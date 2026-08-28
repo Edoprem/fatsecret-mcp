@@ -185,13 +185,37 @@ def _serving_for_entry(
     entry: dict[str, Any],
     food_cache: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    """Look up the exact serving referenced by a diary entry."""
+    """Look up the exact serving referenced by a diary entry.
+
+    Some diary entries can reference food IDs that FatSecret's food.get.v4
+    endpoint no longer resolves. In that case keep the diary entry and simply
+    skip serving enrichment instead of failing the whole diary read.
+    """
     food_id = str(entry.get("food_id") or "")
+
+    if not food_id:
+        return {}
+
     if food_id not in food_cache:
-        food_cache[food_id] = client.call("food.get.v4", {"food_id": food_id}).get("food") or {}
-    servings = _as_list((food_cache[food_id].get("servings") or {}).get("serving"))
+        try:
+            food_cache[food_id] = (
+                client.call("food.get.v4", {"food_id": food_id}).get("food") or {}
+            )
+        except FatSecretError as e:
+            if e.code == 106:
+                food_cache[food_id] = {}
+            else:
+                raise
+
+    servings = _as_list(
+        (food_cache[food_id].get("servings") or {}).get("serving")
+    )
     serving_id = str(entry.get("serving_id") or "")
-    return next((s for s in servings if str(s.get("serving_id")) == serving_id), {})
+
+    return next(
+        (s for s in servings if str(s.get("serving_id")) == serving_id),
+        {},
+    )
 
 
 def _enrich_diary_entry(

@@ -95,6 +95,28 @@ If you'd rather not rely on the entry-point script:
 }
 ```
 
+## Deploy on Render for a ChatGPT connection
+
+This repository includes a `render.yaml` Blueprint for a free Docker web
+service in Frankfurt. Create a Render Blueprint from this repository and enter
+the four `FATSECRET_*` values from your local
+`~/.config/fatsecret-mcp/config.json`. Generate a separate URL-safe secret for
+`MCP_PATH_TOKEN`, for example with
+`python -c "import secrets; print(secrets.token_urlsafe(32))"`.
+Never commit these values to Git.
+
+The ChatGPT custom MCP connection URL is
+`https://<your-service>.onrender.com/<MCP_PATH_TOKEN>/mcp` with no additional
+authentication. The token in the URL controls access to your single-user diary;
+keep the full URL private. The usual `/mcp` path is unavailable when the token
+is configured. If a different MCP client supports bearer headers, you can also
+set `MCP_AUTH_TOKEN` and send `Authorization: Bearer <MCP_AUTH_TOKEN>`.
+
+Render's free service sleeps after 15 minutes without traffic and takes about
+one minute to wake. A ChatGPT request during wake-up may need to be retried.
+The service stores no diary data on Render; it reads and writes through the
+FatSecret API using the supplied credentials.
+
 ## Deploy on Railway
 
 For agents that aren't on the same host as the FS config file (a hosted bot, a phone-side agent, multiple gateways sharing one tracker), deploy this as an SSE endpoint:

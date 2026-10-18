@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: fatsecret-mcp
+    runtime: docker
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: FATSECRET_CONSUMER_KEY
+        sync: false
+      - key: FATSECRET_CONSUMER_SECRET
+        sync: false
+      - key: FATSECRET_USER_TOKEN
+        sync: false
+      - key: FATSECRET_USER_TOKEN_SECRET
+        sync: false
+      - key: MCP_PATH_TOKEN
+        sync: false

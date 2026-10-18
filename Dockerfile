@@ -1,7 +1,5 @@
-# fatsecret-mcp HTTP/SSE deployment image.
-#
-# Runs the stdio MCP server behind mcp-proxy so it's reachable as an SSE endpoint.
-# Configure via env vars (see README "Deploy on Railway"):
+# fatsecret-mcp streamable HTTP deployment image.
+# Configure via env vars (see README "Deploy on Render"):
 #   FATSECRET_CONSUMER_KEY, FATSECRET_CONSUMER_SECRET,
 #   FATSECRET_USER_TOKEN,   FATSECRET_USER_TOKEN_SECRET
 #
@@ -13,7 +11,7 @@
 #     -e FATSECRET_USER_TOKEN=... \
 #     -e FATSECRET_USER_TOKEN_SECRET=... \
 #     fatsecret-mcp
-# Endpoint: http://localhost:8000/sse
+# Endpoint: http://localhost:8000/mcp (or /<MCP_PATH_TOKEN>/mcp)
 
 FROM python:3.12-slim
 

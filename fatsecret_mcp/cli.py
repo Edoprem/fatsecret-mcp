@@ -11,6 +11,7 @@ import argparse
 import getpass
 import json
 import os
+import re
 import sys
 
 from .client import Client
@@ -32,6 +33,17 @@ def cmd_serve(args: argparse.Namespace) -> int:
     # FastMCP's default DNS rebinding protection only allows localhost hosts.
     # Disable for hosted deploys so external hostnames reach the endpoint.
     server.settings.transport_security.enable_dns_rebinding_protection = False
+
+    # ChatGPT custom MCP connections can use a URL without sending a fixed
+    # Authorization header. Keep the single-user diary off the default path.
+    path_token = os.environ.get("MCP_PATH_TOKEN", "").strip()
+    if path_token:
+        if not re.fullmatch(r"[A-Za-z0-9_-]{32,128}", path_token):
+            raise ValueError("MCP_PATH_TOKEN must be 32-128 URL-safe characters")
+        if args.transport == "streamable-http":
+            server.settings.streamable_http_path = f"/{path_token}/mcp"
+        else:
+            server.settings.sse_path = f"/{path_token}/sse"
 
     auth_token = os.environ.get("MCP_AUTH_TOKEN", "").strip()
     if not auth_token:
